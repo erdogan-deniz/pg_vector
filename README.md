@@ -1,1 +1,1 @@
-# pg_vector_package
+# pg_vector
