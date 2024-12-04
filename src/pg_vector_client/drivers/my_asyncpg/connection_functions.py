@@ -1,6 +1,5 @@
 """"""
 
-# import asyncio
 import asyncpg
 import structlog
 
@@ -10,7 +9,6 @@ from asyncpg import (
     InterfaceError,
     InvalidPasswordError,
     CannotConnectNowError,
-    ConnectionFailureError,
     InvalidCatalogNameError,
     ConnectionDoesNotExistError,
     InvalidAuthorizationSpecificationError
@@ -22,9 +20,9 @@ logger: BoundLogger = structlog.get_logger()
 async def create_connection(
     host: str,
     port: int,
-    database: str,
+    db: str,
     user: str,
-    password: str
+    pass_: str
 ) -> Connection | None:
     """"""
 
@@ -32,9 +30,9 @@ async def create_connection(
         conn: Connection = await asyncpg.connect(
             host=host,
             port=port,
-            database=database,
+            database=db,
             user=user,
-            password=password
+            password=pass_
         )
 
         await logger.ainfo("\nConnection to database has been created.")
@@ -55,12 +53,6 @@ async def create_connection(
     except CannotConnectNowError as cann_conn_err:
         await logger.aerror(
             f"\nCannotConnectNowError: {str(cann_conn_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {create_connection.__name__}.\n"
-        )
-    except ConnectionFailureError as conn_fail_err:
-        await logger.aerror(
-            f"\nConnectionFailureError: {str(conn_fail_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
@@ -91,17 +83,3 @@ async def create_connection(
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
-
-
-# async def main() -> None:
-#     """"""
-
-#     conn: Connection = await create_connection(
-#         host="localhost",
-#         port=5432,
-#         database="postgres",
-#         user="postgres",
-#         password="196910"
-#     )
-
-# asyncio.run(main())
