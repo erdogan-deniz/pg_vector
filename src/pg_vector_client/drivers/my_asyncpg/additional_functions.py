@@ -151,6 +151,8 @@ async def prepare_vector_connector(conn: Connection) -> None:
     try:
         await enable_extention(conn)
         await registr_vector_type(conn)
+
+        await logger.ainfo("\nThe connector is ready.")
     except Exception as unkn_err:
         await logger.awarning(
             "\nException: "

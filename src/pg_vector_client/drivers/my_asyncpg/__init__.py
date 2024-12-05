@@ -1,5 +1,6 @@
 """"""
 
+from .query_functions import execute_query
 from .connection_functions import (
     create_connection,
     remove_connection

@@ -139,8 +139,6 @@ async def remove_connection(conn: Connection) -> None:
         await conn.close()
 
         await logger.ainfo("\nConnection to database has been closed.")
-
-        return conn
     except InterfaceError as interf_err:
         await logger.aerror(
             "\nInterfaceError: "

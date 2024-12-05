@@ -16,6 +16,10 @@ async def main():
         )
 
     await my_asyncpg.prepare_vector_connector(conn)
+    await my_asyncpg.execute_query(
+        conn,
+        "CREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3))"
+    )
     await my_asyncpg.remove_connection(conn)
 
 asyncio.run(main())
