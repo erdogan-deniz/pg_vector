@@ -18,6 +18,20 @@ from asyncpg import (
     InsufficientResourcesError,
     InvalidSQLStatementNameError,
 
+    DataError
+    InternalError
+    PostgresError
+    IntegrityError
+    ProgrammingError
+    OperationalError
+    CheckViolationError
+    UniqueViolationError
+    UniqueViolationError
+    NotNullViolationError
+    ForeignKeyViolationError
+    ForeignKeyViolationError
+    InvalidTextRepresentationError
+
     PostgresError
 )
 
@@ -125,6 +139,21 @@ async def add_vector(
         )
 
         await logger.ainfo("\nThe vector has been added.")
+    except UniqueViolationError
+    except DataError
+    except ForeignKeyViolationError
+    except InvalidTextRepresentationError
+    except PostgresError
+    except UniqueViolationError
+    except ForeignKeyViolationError
+    except NotNullViolationError
+    except CheckViolationError
+    except DataError
+    except IntegrityError
+    except InternalError
+    except ProgrammingError
+    except OperationalError
+    except PostgresError
     except Exception as unkn_err:
         await logger.awarning(
             "\nException: "
