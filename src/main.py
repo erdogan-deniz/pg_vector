@@ -3,10 +3,6 @@
 import sys
 import asyncio
 
-from aiologger import Logger
-from aiologger.levels import LogLevel
-from aiologger.handlers.streams import AsyncStreamHandler
-
 async def main() -> None:
     """"""
 

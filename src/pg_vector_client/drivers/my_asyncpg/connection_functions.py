@@ -9,6 +9,7 @@ from asyncpg import (
     InvalidPasswordError,
     CannotConnectNowError,
     ConnectionFailureError,
+    PostgresConnectionError,
     TooManyConnectionsError,
     ConnectionRejectionError,
     ClientCannotConnectError,
@@ -16,14 +17,13 @@ from asyncpg import (
     InsufficientPrivilegeError,
     InvalidAuthorizationSpecificationError,
 
-    PostgresConnectionError,
-
     InterfaceError,
     DataCorruptedError,
     CrashShutdownError,
     InternalClientError,
     ConnectionDoesNotExistError,
 
+    PostgresError,
     UnknownPostgresError
 )
 
@@ -116,6 +116,13 @@ async def create_connection(
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
+    except PostgresError as postgr_err:
+        await logger.aerror(
+            "\nPostgresError: "
+            f"{str(postgr_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {create_connection.__name__}.\n"
+        )
     except UnknownPostgresError as unkn_postgr_err:
         await logger.aerror(
             "\nUnknownPostgresError: "
@@ -188,6 +195,13 @@ async def remove_connection(conn: Connection) -> None:
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
+    except PostgresError as postgr_err:
+        await logger.aerror(
+            "\nPostgresError: "
+            f"{str(postgr_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {remove_connection.__name__}.\n"
+        )
     except UnknownPostgresError as unkn_postgr_err:
         await logger.aerror(
             "\nUnknownPostgresError: "
@@ -202,3 +216,6 @@ async def remove_connection(conn: Connection) -> None:
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
+
+
+async def create_worked conn
