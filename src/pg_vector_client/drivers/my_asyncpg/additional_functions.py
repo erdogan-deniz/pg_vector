@@ -8,7 +8,6 @@ from pgvector.asyncpg import register_vector
 from asyncpg import (
     InterfaceError,
     SQLRoutineError,
-    NoDataFoundError,
     AdminShutdownError,
     InternalClientError,
     InternalServerError,
@@ -19,12 +18,10 @@ from asyncpg import (
     UnsupportedServerFeatureError,
     InvalidDatabaseDefinitionError,
     InvalidTransactionInitiationError,
-    InvalidAuthorizationSpecificationError,
 
     PostgresError,
     PostgresSystemError,
     UnknownPostgresError,
-    PostgresConnectionError
 )
 
 logger: BoundLogger = structlog.get_logger()
@@ -46,13 +43,6 @@ async def registr_vector_type(conn: Connection) -> None:
         await logger.aerror(
             "\nSQLRoutineError: "
             f"{str(sql_rout_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
-        )
-    except NoDataFoundError as data_found_err:
-        await logger.aerror(
-            "\nNoDataFoundError: "
-            f"{str(data_found_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {registr_vector_type.__name__}.\n"
         )
@@ -112,18 +102,10 @@ async def registr_vector_type(conn: Connection) -> None:
             f"File name is: {__file__}.\n"
             f"Function name is: {registr_vector_type.__name__}.\n"
         )
-    except InvalidAuthorizationSpecificationError as inv_auth_spec_err:
-        await logger.aerror(
-            "\nInvalidAuthorizationSpecificationError: "
-            f"{str(inv_auth_spec_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
-        )
     except (
         PostgresError,
         PostgresSystemError,
         UnknownPostgresError,
-        PostgresConnectionError,
     ) as postgr_err:
         await logger.aerror(
             "\nPostgresError: "

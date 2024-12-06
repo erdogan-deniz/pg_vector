@@ -5,15 +5,22 @@ import structlog
 from structlog import BoundLogger
 from asyncpg.connection import Connection
 from asyncpg import (
-    DataError,
+    InterfaceError,
+    InvalidNameError,
     AdminShutdownError,
-    SyntaxOrAccessError,
-    DatabaseDroppedError,
+    InternalClientError,
+    InternalServerError,
+    UndefinedTableError,
+    UndefinedObjectError,
+    IdleSessionTimeoutError,
     ActiveSQLTransactionError,
     InsufficientPrivilegeError,
+    DependentObjectsStillExistError,
+    InvalidTransactionInitiationError,
 
     PostgresError,
-    UnknownPostgresError
+    PostgresSystemError,
+    UnknownPostgresError,
 )
 
 logger: BoundLogger = structlog.get_logger()
@@ -29,11 +36,19 @@ async def drop_table(
         sql_query: str = f"DROP TABLE IF EXISTS {table_name};"
 
         await conn.execute(sql_query)
-
-        await logger.ainfo(f"\nThe {table_name} table has been deleted.")
-    except DataError as data_err:
+    except InterfaceError as interf_err:
         await logger.aerror(
-            f"\nDataError: {str(data_err).capitalize()}.\n"
+            f"\nInterfaceError: {str(interf_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {drop_table.__name__}.\n"
+        )
+    except (
+        InvalidNameError,
+        UndefinedTableError,
+        UndefinedObjectError,
+    ) as inv_name_err:
+        await logger.aerror(
+            f"\nTabledNameError: {str(inv_name_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
@@ -43,51 +58,59 @@ async def drop_table(
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except DatabaseDroppedError as db_drop_err:
+    except (
+        InternalClientError,
+        InternalServerError,
+    ) as intern_err:
         await logger.aerror(
-            f"\nDatabaseDroppedError: {str(db_drop_err).capitalize()}.\n"
+            f"\nInternalError: {str(intern_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except ActiveSQLTransactionError as sql_trans_err:
+    except IdleSessionTimeoutError as idle_sess_err:
         await logger.aerror(
-            "\nActiveSQLTransactionError: "
-            f"{str(sql_trans_err).capitalize()}.\n"
+            f"\nIdleSessionTimeoutError: {str(idle_sess_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except InsufficientPrivilegeError as insuff_priv_err:
+    except (
+        ActiveSQLTransactionError,
+        InvalidTransactionInitiationError,
+    ) as trans_err:
         await logger.aerror(
-            "\nInsufficientPrivilegeError: "
-            f"{str(insuff_priv_err).capitalize()}.\n"
+            f"\nTransactionError: {str(trans_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except SyntaxOrAccessError as synt_or_access_err:
+    except InsufficientPrivilegeError as insuff_err:
         await logger.aerror(
-            "\nSyntaxOrAccessError: "
-            f"{str(synt_or_access_err).capitalize()}.\n"
+            f"\nInsufficientPrivilegeError: {str(insuff_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except PostgresError as postgr_err:
+    except DependentObjectsStillExistError as dep_oojs_err:
         await logger.aerror(
-            "\nPostgresError: "
-            f"{str(postgr_err).capitalize()}.\n"
+            "\nDependentObjectsStillExistError: "
+            f"{str(dep_oojs_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except UnknownPostgresError as unkn_postgr_err:
+    except (
+        PostgresError,
+        PostgresSystemError,
+        UnknownPostgresError,
+    ) as postgr_err:
         await logger.aerror(
-            "\nUnknownPostgresError: "
-            f"{str(unkn_postgr_err).capitalize()}.\n"
+            f"\nPostgresError: {str(postgr_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
-    except Exception as unkn_err:
+    except Exception as err:
         await logger.awarning(
             "\nException: "
-            f"{str(unkn_err).capitalize()}.\n"
+            f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {drop_table.__name__}.\n"
         )
+    else:
+        await logger.ainfo(f"\nThe {table_name} table has been deleted.")

@@ -5,26 +5,28 @@ import structlog
 
 from structlog import BoundLogger
 from asyncpg.connection import Connection
+from .additional_functions import registr_vector_type
 from asyncpg import (
-    InvalidPasswordError,
+    InterfaceError,
+    AdminShutdownError,
+    InternalClientError,
+    InternalServerError,
     CannotConnectNowError,
     ConnectionFailureError,
-    PostgresConnectionError,
     TooManyConnectionsError,
-    ConnectionRejectionError,
+    UndefinedParameterError,
     ClientCannotConnectError,
     ClientConfigurationError,
+    ConnectionRejectionError,
+    ProgramLimitExceededError,
     InsufficientPrivilegeError,
+    ConfigurationLimitExceededError,
     InvalidAuthorizationSpecificationError,
 
-    InterfaceError,
-    DataCorruptedError,
-    CrashShutdownError,
-    InternalClientError,
-    ConnectionDoesNotExistError,
-
     PostgresError,
-    UnknownPostgresError
+    PostgresSystemError,
+    UnknownPostgresError,
+    PostgresConnectionError
 )
 
 logger: BoundLogger = structlog.get_logger()
@@ -47,44 +49,41 @@ async def create_connection(
             user=user,
             password=pass_
         )
-
-        await logger.ainfo("\nConnection to database has been created.")
-
-        return conn
-    except InvalidPasswordError as inv_pass_err:
+    except InterfaceError as interf_err:
         await logger.aerror(
-            f"\nInvalidPasswordError: {str(inv_pass_err).capitalize()}.\n"
+            f"\nInterfaceError: {str(interf_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
-    except CannotConnectNowError as conn_now_err:
+    except AdminShutdownError as adm_shutd_err:
         await logger.aerror(
-            f"\nCannotConnectNowError: {str(conn_now_err).capitalize()}.\n"
+            f"\nAdminShutdownError: {str(adm_shutd_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
-    except ConnectionFailureError as conn_fail_err:
+    except (
+        InternalClientError,
+        InternalServerError,
+    ) as intern_err:
         await logger.aerror(
-            f"\nConnectionFailureError: {str(conn_fail_err).capitalize()}.\n"
+            f"\nInternalError: {str(intern_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {create_connection.__name__}.\n"
+        )
+    except (
+        CannotConnectNowError,
+        ConnectionFailureError,
+        ConnectionRejectionError,
+        ClientCannotConnectError,
+    ) as conn_err:
+        await logger.aerror(
+            f"\nConnectionError: {str(conn_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
     except TooManyConnectionsError as many_conn_err:
         await logger.aerror(
             f"\nTooManyConnectionsError: {str(many_conn_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {create_connection.__name__}.\n"
-        )
-    except ConnectionRejectionError as conn_rej_err:
-        await logger.aerror(
-            f"\nConnectionRejectionError: {str(conn_rej_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {create_connection.__name__}.\n"
-        )
-    except ClientCannotConnectError as client_conn_err:
-        await logger.aerror(
-            "\nClientCannotConnectError: "
-            f"{str(client_conn_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
@@ -95,10 +94,24 @@ async def create_connection(
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
-    except InsufficientPrivilegeError as insuff_err:
+    except ProgramLimitExceededError as prog_limit_err:
+        await logger.aerror(
+            "\nProgramLimitExceededError: "
+            f"{str(prog_limit_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {create_connection.__name__}.\n"
+        )
+    except InsufficientPrivilegeError as insuff_privil_err:
         await logger.aerror(
             "\nInsufficientPrivilegeError: "
-            f"{str(insuff_err).capitalize()}.\n"
+            f"{str(insuff_privil_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {create_connection.__name__}.\n"
+        )
+    except ConfigurationLimitExceededError as conf_limit_err:
+        await logger.aerror(
+            "\nConfigurationLimitExceededError: "
+            f"{str(conf_limit_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
@@ -109,34 +122,60 @@ async def create_connection(
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
-    except PostgresConnectionError as postgr_conn_err:
+    except (
+        PostgresError,
+        PostgresSystemError,
+        UnknownPostgresError,
+        PostgresConnectionError,
+    ) as postrgr_err:
         await logger.aerror(
-            "\nPostgresConnectionError: "
-            f"{str(postgr_conn_err).capitalize()}.\n"
+            f"\nPostgresError: {str(postrgr_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
-    except PostgresError as postgr_err:
-        await logger.aerror(
-            "\nPostgresError: "
-            f"{str(postgr_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {create_connection.__name__}.\n"
-        )
-    except UnknownPostgresError as unkn_postgr_err:
-        await logger.aerror(
-            "\nUnknownPostgresError: "
-            f"{str(unkn_postgr_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {create_connection.__name__}.\n"
-        )
-    except Exception as unkn_err:
+    except Exception as err:
         await logger.awarning(
             "\nException: "
-            f"{str(unkn_err).capitalize()}.\n"
+            f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {create_connection.__name__}.\n"
         )
+    else:
+        await logger.ainfo("\nConnection to database has been created.")
+
+        return conn
+
+
+async def create_worked_connection(
+    host: str,
+    port: int,
+    db: str,
+    user: str,
+    pass_: str
+) -> Connection | None:
+    """"""
+
+    try:
+        conn: Connection | None = await create_connection(
+            host=host,
+            port=port,
+            database=db,
+            user=user,
+            password=pass_
+        )
+
+        await registr_vector_type(conn)
+    except Exception as err:
+        await logger.awarning(
+            "\nException: "
+            f"{str(err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {create_worked_connection.__name__}.\n"
+        )
+    else:
+        await logger.ainfo("\nA prepared connection has been created.")
+
+        return conn
 
 
 async def remove_connection(conn: Connection) -> None:
@@ -144,78 +183,45 @@ async def remove_connection(conn: Connection) -> None:
 
     try:
         await conn.close()
-
-        await logger.ainfo("\nConnection to database has been closed.")
-    except InterfaceError as interf_err:
+    except AdminShutdownError as adm_shutd_err:
         await logger.aerror(
-            "\nInterfaceError: "
-            f"{str(interf_err).capitalize()}.\n"
+            "\nAdminShutdownError: "
+            f"{str(adm_shutd_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
-    except DataCorruptedError as data_corr_err:
-        await logger.aerror(
-            "\nDataCorruptedError: "
-            f"{str(data_corr_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
-        )
-    except CrashShutdownError as crash_err:
-        await logger.aerror(
-            "\nCrashShutdownError: "
-            f"{str(crash_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
-        )
-    except InternalClientError as intern_client_err:
+    except InternalClientError as intern_err:
         await logger.aerror(
             "\nInternalClientError: "
-            f"{str(intern_client_err).capitalize()}.\n"
+            f"{str(intern_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
-    except ConnectionFailureError as conn_fail_err:
+    except UndefinedParameterError as undef_par_err:
         await logger.aerror(
-            "\nConnectionFailureError: "
-            f"{str(conn_fail_err).capitalize()}.\n"
+            "\nUndefinedParameterError: "
+            f"{str(undef_par_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
-    except InsufficientPrivilegeError as insuff_priv_err:
-        await logger.aerror(
-            "\nInsufficientPrivilegeError: "
-            f"{str(insuff_priv_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
-        )
-    except ConnectionDoesNotExistError as conn_d_exist_err:
-        await logger.aerror(
-            "\nConnectionDoesNotExistError: "
-            f"{str(conn_d_exist_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
-        )
-    except PostgresError as postgr_err:
+    except (
+        PostgresError,
+        PostgresSystemError,
+        UnknownPostgresError,
+        PostgresConnectionError,
+    ) as postgres_err:
         await logger.aerror(
             "\nPostgresError: "
-            f"{str(postgr_err).capitalize()}.\n"
+            f"{str(postgres_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
-    except UnknownPostgresError as unkn_postgr_err:
-        await logger.aerror(
-            "\nUnknownPostgresError: "
-            f"{str(unkn_postgr_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
-        )
-    except Exception as unkn_err:
+    except Exception as err:
         await logger.awarning(
             "\nException: "
-            f"{str(unkn_err).capitalize()}.\n"
+            f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )
-
-
-async def create_worked conn
+    else:
+        await logger.ainfo("\nConnection to database has been closed.")
