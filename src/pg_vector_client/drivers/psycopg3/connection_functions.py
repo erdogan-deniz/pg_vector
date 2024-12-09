@@ -14,7 +14,7 @@ from psycopg import (
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-logger: BoundLogger = structlog.get_logger()
+logger: BoundLogger = structlog.get_logger(__name__)
 
 
 async def create_connection(

@@ -5,19 +5,25 @@ import structlog
 from structlog import BoundLogger
 from asyncpg.connection import Connection
 from asyncpg import (
+    InterfaceError,
+    SQLRoutineError,
     AdminShutdownError,
-    SyntaxOrAccessError,
-    DatabaseDroppedError,
+    InternalClientError,
+    InternalServerError,
+    IdleSessionTimeoutError,
     FeatureNotSupportedError,
-    ActiveSQLTransactionError,
     InsufficientPrivilegeError,
-    InvalidAuthorizationSpecificationError,
+    UnsupportedClientFeatureError,
+    UnsupportedServerFeatureError,
+    InvalidDatabaseDefinitionError,
+    InvalidTransactionInitiationError,
 
     PostgresError,
-    UnknownPostgresError
+    PostgresSystemError,
+    UnknownPostgresError,
 )
 
-logger: BoundLogger = structlog.get_logger()
+logger: BoundLogger = structlog.get_logger(__name__)
 
 
 async def enable_extention(conn: Connection) -> None:
@@ -27,31 +33,46 @@ async def enable_extention(conn: Connection) -> None:
         sql_query: str = "CREATE EXTENSION IF NOT EXISTS vector;"
 
         await conn.execute(sql_query)
-
-        await logger.ainfo("\nPG_Vector extension has been enabled.")
-    except AdminShutdownError as adm_shutd_err:
+    except InterfaceError as interf_err:
         await logger.aerror(
-            f"\nAdminShutdownError: {str(adm_shutd_err).capitalize()}.\n"
+            f"\nInterfaceError: {str(interf_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except DatabaseDroppedError as db_drop_err:
+    except SQLRoutineError as sql_rout_err:
         await logger.aerror(
-            f"\nDatabaseDroppedError: {str(db_drop_err).capitalize()}.\n"
+            f"\nSQLRoutineError: {str(sql_rout_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except FeatureNotSupportedError as feat_n_supp_err:
+    except AdminShutdownError as admin_shutd_err:
         await logger.aerror(
-            "\nFeatureNotSupportedError: "
-            f"{str(feat_n_supp_err).capitalize()}.\n"
+            f"\nAdminShutdownError: {str(admin_shutd_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except ActiveSQLTransactionError as sql_trans_err:
+    except (
+        InternalClientError,
+        InternalServerError,
+    ) as intern_err:
         await logger.aerror(
-            "\nActiveSQLTransactionError: "
-            f"{str(sql_trans_err).capitalize()}.\n"
+            f"\nInternalError: {str(intern_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {enable_extention.__name__}.\n"
+        )
+    except IdleSessionTimeoutError as idle_sess_err:
+        await logger.aerror(
+            f"\nIdleSessionTimeoutError: {str(idle_sess_err).capitalize()}.\n"
+            f"File name is: {__file__}.\n"
+            f"Function name is: {enable_extention.__name__}.\n"
+        )
+    except (
+        FeatureNotSupportedError,
+        UnsupportedServerFeatureError,
+        UnsupportedClientFeatureError,
+    ) as feat_err:
+        await logger.aerror(
+            f"\nFeatureError: {str(feat_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
@@ -62,38 +83,39 @@ async def enable_extention(conn: Connection) -> None:
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except InvalidAuthorizationSpecificationError as inv_auth_err:
+    except InvalidDatabaseDefinitionError as inv_db_err:
         await logger.aerror(
-            "\nInvalidAuthorizationSpecificationError: "
-            f"{str(inv_auth_err).capitalize()}.\n"
+            "\nInvalidDatabaseDefinitionError: "
+            f"{str(inv_db_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except SyntaxOrAccessError as synt_or_access_err:
+    except InvalidTransactionInitiationError as inv_trans_err:
         await logger.aerror(
-            "\nSyntaxOrAccessError: "
-            f"{str(synt_or_access_err).capitalize()}.\n"
+            "\nInvalidTransactionInitiationError: "
+            f"{str(inv_trans_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except PostgresError as postgr_err:
+    except (
+        PostgresError,
+        PostgresSystemError,
+        UnknownPostgresError,
+    ) as postgr_err:
         await logger.aerror(
-            "\nPostgresError: "
-            f"{str(postgr_err).capitalize()}.\n"
+            f"\nPostgresError: {str(postgr_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )
-    except UnknownPostgresError as unkn_postgr_err:
-        await logger.aerror(
-            "\nUnknownPostgresError: "
-            f"{str(unkn_postgr_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {enable_extention.__name__}.\n"
-        )
-    except Exception as unkn_err:
+    except Exception as err:
         await logger.awarning(
             "\nException: "
-            f"{str(unkn_err).capitalize()}.\n"
+            f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
+        )
+    else:
+        await logger.ainfo(
+            "An extension has been registered "
+            "for the database.\n"
         )
