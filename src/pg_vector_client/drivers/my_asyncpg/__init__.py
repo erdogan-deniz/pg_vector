@@ -1,5 +1,6 @@
 """"""
 
+from .data import SimilarityOperators
 from .query_functions import execute_query
 from .database_functions import enable_extention
 from .vector_functions import (

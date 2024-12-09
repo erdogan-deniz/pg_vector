@@ -6,9 +6,9 @@ import numpy as np
 
 from typing import Any
 from structlog import BoundLogger
+from .data import SimilarityOperators
 from asyncpg.connection import Connection
 from asyncpg import (
-    GroupingError,
     InterfaceError,
     SQLRoutineError,
     InvalidNameError,
@@ -17,18 +17,13 @@ from asyncpg import (
     AdminShutdownError,
     InternalServerError,
     UndefinedColumnError,
-    UniqueViolationError,
     DatatypeMismatchError,
     CollationMismatchError,
     IdleSessionTimeoutError,
-    CardinalityViolationError,
     ActiveSQLTransactionError,
     InsufficientPrivilegeError,
     NumericValueOutOfRangeError,
-    IndeterminateCollationError,
     InvalidColumnReferenceError,
-    InvalidRegularExpressionError,
-    IntegrityConstraintViolationError,
     InvalidTransactionInitiationError,
 
     PostgresError,
@@ -111,16 +106,6 @@ async def add_vector(
             f"File name is: {__file__}.\n"
             f"Function name is: {add_vector.__name__}.\n"
         )
-    except (
-        UniqueViolationError,
-        CardinalityViolationError,
-        IntegrityConstraintViolationError,
-    ) as limitation_err:
-        await logger.aerror(
-            f"\nLimitationError: {str(limitation_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {add_vector.__name__}.\n"
-        )
     except DatatypeMismatchError as data_mism_err:
         await logger.aerror(
             f"\nDatatypeMismatchError: {str(data_mism_err).capitalize()}.\n"
@@ -187,9 +172,10 @@ async def add_vector(
 async def get_neighbor_vectors(
     conn: Connection,
     table_name: str,
-    vec_field_name: str,
     embedding: np.ndarray,
-    neighb_count: int
+    vec_field_name: str = "embedding",
+    neighb_count: int = 5,
+    idx_type: SimilarityOperators = SimilarityOperators.vector_cosine_ops
 ) -> Any | None:
     """"""
 
@@ -197,19 +183,13 @@ async def get_neighbor_vectors(
         sql_query: str = f"""
                           SELECT *
                           FROM {table_name}
-                          ORDER BY {vec_field_name} <-> $1
+                          ORDER BY {vec_field_name} {idx_type.value} $1
                           LIMIT {neighb_count};
                           """
 
         res: Any = await conn.execute(
             sql_query,
             embedding
-        )
-    except GroupingError as group_err:
-        await logger.aerror(
-            f"\nGroupingError: {str(group_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {get_neighbor_vectors.__name__}.\n"
         )
     except InterfaceError as interf_err:
         await logger.aerror(
@@ -250,12 +230,9 @@ async def get_neighbor_vectors(
             f"File name is: {__file__}.\n"
             f"Function name is: {get_neighbor_vectors.__name__}.\n"
         )
-    except (
-        CollationMismatchError,
-        IndeterminateCollationError,
-    ) as sort_err:
+    except CollationMismatchError as coll_mism_err:
         await logger.aerror(
-            f"\nSortingError: {str(sort_err).capitalize()}.\n"
+            f"\nCollationMismatchError: {str(coll_mism_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {get_neighbor_vectors.__name__}.\n"
         )
@@ -282,13 +259,6 @@ async def get_neighbor_vectors(
         await logger.aerror(
             "\nInvalidColumnReferenceError: "
             f"{str(inv_col_ref_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {get_neighbor_vectors.__name__}.\n"
-        )
-    except InvalidRegularExpressionError as inv_reg_express_err:
-        await logger.aerror(
-            "\nInvalidRegularExpressionError: "
-            f"{str(inv_reg_express_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {get_neighbor_vectors.__name__}.\n"
         )

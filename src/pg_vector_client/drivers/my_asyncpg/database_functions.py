@@ -15,7 +15,6 @@ from asyncpg import (
     InsufficientPrivilegeError,
     UnsupportedClientFeatureError,
     UnsupportedServerFeatureError,
-    InvalidDatabaseDefinitionError,
     InvalidTransactionInitiationError,
 
     PostgresError,
@@ -80,13 +79,6 @@ async def enable_extention(conn: Connection) -> None:
         await logger.aerror(
             "\nInsufficientPrivilegeError: "
             f"{str(insuff_priv_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {enable_extention.__name__}.\n"
-        )
-    except InvalidDatabaseDefinitionError as inv_db_err:
-        await logger.aerror(
-            "\nInvalidDatabaseDefinitionError: "
-            f"{str(inv_db_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {enable_extention.__name__}.\n"
         )

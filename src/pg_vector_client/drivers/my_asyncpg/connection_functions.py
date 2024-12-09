@@ -15,7 +15,6 @@ from asyncpg import (
     CannotConnectNowError,
     ConnectionFailureError,
     TooManyConnectionsError,
-    UndefinedParameterError,
     IdleSessionTimeoutError,
     ClientCannotConnectError,
     ClientConfigurationError,
@@ -25,7 +24,6 @@ from asyncpg import (
     InsufficientPrivilegeError,
     UnsupportedClientFeatureError,
     UnsupportedServerFeatureError,
-    InvalidDatabaseDefinitionError,
     ConfigurationLimitExceededError,
     InvalidTransactionInitiationError,
     InvalidAuthorizationSpecificationError,
@@ -214,13 +212,6 @@ async def registr_vector_type(conn: Connection) -> None:
             f"File name is: {__file__}.\n"
             f"Function name is: {registr_vector_type.__name__}.\n"
         )
-    except InvalidDatabaseDefinitionError as inv_db_def_err:
-        await logger.aerror(
-            "\nInvalidDatabaseDefinitionError: "
-            f"{str(inv_db_def_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
-        )
     except InvalidTransactionInitiationError as inv_trans_init_err:
         await logger.aerror(
             "\nInvalidTransactionInitiationError: "
@@ -299,13 +290,6 @@ async def remove_connection(conn: Connection) -> None:
         await logger.aerror(
             "\nInternalClientError: "
             f"{str(intern_err).capitalize()}.\n"
-            f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
-        )
-    except UndefinedParameterError as undef_par_err:
-        await logger.aerror(
-            "\nUndefinedParameterError: "
-            f"{str(undef_par_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
             f"Function name is: {remove_connection.__name__}.\n"
         )

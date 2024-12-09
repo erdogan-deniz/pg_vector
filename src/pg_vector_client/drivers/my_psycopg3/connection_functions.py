@@ -9,7 +9,7 @@ from psycopg import AsyncConnection
 from psycopg import (
     InternalError,
     InterfaceError,
-    OperationalError
+    OperationalError,
 )
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

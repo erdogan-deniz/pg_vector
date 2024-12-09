@@ -3,6 +3,7 @@
 import structlog
 
 from structlog import BoundLogger
+from .data import SimilarityOperators
 from asyncpg.connection import Connection
 from asyncpg import (
     InterfaceError,
@@ -12,7 +13,6 @@ from asyncpg import (
     InternalClientError,
     InternalServerError,
     UndefinedTableError,
-    UndefinedObjectError,
     UndefinedColumnError,
     DuplicateObjectError,
     DatatypeMismatchError,
@@ -51,7 +51,6 @@ async def drop_table(
     except (
         InvalidNameError,
         UndefinedTableError,
-        UndefinedObjectError,
     ) as inv_name_err:
         await logger.aerror(
             f"\nTabledNameError: {str(inv_name_err).capitalize()}.\n"
@@ -125,14 +124,15 @@ async def drop_table(
 async def create_hnsw_index(
     conn: Connection,
     table_name: str,
-    col_name: str
+    col_name: str = "embedding",
+    idx_type: SimilarityOperators = SimilarityOperators.vector_cosine_ops
 ) -> None:
     """"""
 
     try:
         sql_query: str = f"""
                           CREATE INDEX ON {table_name}
-                          USING hnsw ({col_name} vector_l2_ops);
+                          USING hnsw ({col_name} {idx_type.name});
                           """
 
         await conn.execute(sql_query)
@@ -235,16 +235,15 @@ async def create_hnsw_index(
 async def create_ivfflat_index(
     conn: Connection,
     table_name: str,
-    col_name: str,
-    clust_count: int
+    col_name: str = "embedding",
+    idx_type: SimilarityOperators = SimilarityOperators.vector_cosine_ops
 ) -> None:
     """"""
 
     try:
         sql_query: str = f"""
                           CREATE INDEX ON {table_name}
-                          USING ivfflat ({col_name} vector_l2_ops)
-                          WITH (lists = {clust_count});
+                          USING ivfflat ({col_name} {idx_type.name});
                           """
 
         await conn.execute(sql_query)
