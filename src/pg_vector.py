@@ -20,7 +20,7 @@ from typing import (
 
 # settings: Settings = get_settings()  # Создание объекта настроек для текущего модуля (Singleton)
 
-logger: BoundLogger = structlog.get_logger()
+logger: BoundLogger = structlog.get_logger(__name__)
 
 class PGVector(BaseVectorDatabase):
     """"""
