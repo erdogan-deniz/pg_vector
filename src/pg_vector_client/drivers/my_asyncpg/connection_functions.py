@@ -42,7 +42,7 @@ async def create_connection(
     port: int,
     db: str,
     user: str,
-    pass_: str
+    password: str
 ) -> Connection | None:
     """"""
 
@@ -52,7 +52,7 @@ async def create_connection(
             port=port,
             database=db,
             user=user,
-            password=pass_
+            password=password
         )
     except InterfaceError as interf_err:
         await logger.aerror(
@@ -151,7 +151,7 @@ async def create_connection(
         return conn
 
 
-async def registr_vector_type(conn: Connection) -> None:
+async def register_vector_type(conn: Connection) -> None:
     """"""
 
     try:
@@ -161,21 +161,21 @@ async def registr_vector_type(conn: Connection) -> None:
             "\nInterfaceError: "
             f"{str(interf_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except SQLRoutineError as sql_rout_err:
         await logger.aerror(
             "\nSQLRoutineError: "
             f"{str(sql_rout_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except AdminShutdownError as admin_shutd_err:
         await logger.aerror(
             "\nAdminShutdownError: "
             f"{str(admin_shutd_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except (
         InternalClientError,
@@ -185,21 +185,21 @@ async def registr_vector_type(conn: Connection) -> None:
             "\nInternalError: "
             f"{str(intern_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except IdleSessionTimeoutError as idle_session_timeout_err:
         await logger.aerror(
             "\nIdleSessionTimeoutError: "
             f"{str(idle_session_timeout_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except InsufficientPrivilegeError as insuff_privil_err:
         await logger.aerror(
             "\nInsufficientPrivilegeError: "
             f"{str(insuff_privil_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except (
         FeatureNotSupportedError,
@@ -210,14 +210,14 @@ async def registr_vector_type(conn: Connection) -> None:
             "\nUnsupportedFeatureError: "
             f"{str(unsupp_feat_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except InvalidTransactionInitiationError as inv_trans_init_err:
         await logger.aerror(
             "\nInvalidTransactionInitiationError: "
             f"{str(inv_trans_init_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except (
         PostgresError,
@@ -228,28 +228,28 @@ async def registr_vector_type(conn: Connection) -> None:
             "\nPostgresError: "
             f"{str(postgr_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     except Exception as err:
         await logger.awarning(
             "\nException: "
             f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {registr_vector_type.__name__}.\n"
+            f"Function name is: {register_vector_type.__name__}.\n"
         )
     else:
         await logger.ainfo(
             "The vector type has been "
-            "registered for the connector.\n"
+            "registered for the connection.\n"
         )
 
 
-async def create_worked_connection(
+async def create_prepared_connection(
     host: str,
     port: int,
     db: str,
     user: str,
-    pass_: str
+    password: str
 ) -> Connection | None:
     """"""
 
@@ -257,24 +257,24 @@ async def create_worked_connection(
         conn: Connection | None = await create_connection(
             host=host,
             port=port,
-            database=db,
+            db=db,
             user=user,
-            password=pass_
+            password=password
         )
 
-        await registr_vector_type(conn)
+        await register_vector_type(conn)
     except Exception as err:
         await logger.awarning(
             "\nException: "
             f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {create_worked_connection.__name__}.\n"
+            f"Function name is: {create_prepared_connection.__name__}.\n"
         )
     else:
         return conn
 
 
-async def remove_connection(conn: Connection) -> None:
+async def delete_connection(conn: Connection) -> None:
     """"""
 
     try:
@@ -284,14 +284,14 @@ async def remove_connection(conn: Connection) -> None:
             "\nAdminShutdownError: "
             f"{str(adm_shutd_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
+            f"Function name is: {delete_connection.__name__}.\n"
         )
     except InternalClientError as intern_err:
         await logger.aerror(
             "\nInternalClientError: "
             f"{str(intern_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
+            f"Function name is: {delete_connection.__name__}.\n"
         )
     except (
         PostgresError,
@@ -303,14 +303,14 @@ async def remove_connection(conn: Connection) -> None:
             "\nPostgresError: "
             f"{str(postgres_err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
+            f"Function name is: {delete_connection.__name__}.\n"
         )
     except Exception as err:
         await logger.awarning(
             "\nException: "
             f"{str(err).capitalize()}.\n"
             f"File name is: {__file__}.\n"
-            f"Function name is: {remove_connection.__name__}.\n"
+            f"Function name is: {delete_connection.__name__}.\n"
         )
     else:
-        await logger.ainfo("Connection to database has been closed.\n")
+        await logger.ainfo("Connection to database has been deleted.\n")

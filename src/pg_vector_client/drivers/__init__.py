@@ -1,6 +1,3 @@
 """"""
 
-import my_asyncpg
-import my_psycopg3
-
-print(dir(my_asyncpg))
+from . import my_asyncpg, my_psycopg3
