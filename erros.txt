@@ -1,0 +1,9 @@
+Error
+DataError
+DatabaseError
+InternalError
+IntegrityError
+InterfaceError
+OperationalError
+ProgrammingError
+NotSupportedError

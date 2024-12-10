@@ -6,7 +6,15 @@ from enum import Enum
 
 
 @enum.unique
-class SimilarityOperators(Enum):
+class VectorIndexType(Enum):
+    """"""
+
+    hnsw = "hnsw"
+    ivfflat = "ivfflat"
+
+
+@enum.unique
+class VectorSimilarityOperators(Enum):
     """"""
 
     vector_ip_ops = "<#>"

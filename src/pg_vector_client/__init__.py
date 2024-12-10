@@ -1,5 +1,3 @@
 """"""
 
-import drivers
-
-print(dir(drivers))
+from . import drivers

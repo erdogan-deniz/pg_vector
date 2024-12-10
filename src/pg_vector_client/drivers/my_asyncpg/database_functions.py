@@ -108,6 +108,6 @@ async def enable_extention(conn: Connection) -> None:
         )
     else:
         await logger.ainfo(
-            "An extension has been registered "
+            "An extension has been enabled "
             "for the database.\n"
         )

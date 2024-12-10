@@ -61,7 +61,7 @@ async def execute_query(
     """"""
 
     try:
-        res: Any = await conn.execute(sql_query)
+        query_resp: Any = await conn.execute(sql_query)
     except (
         DataError,
         DatatypeMismatchError,
@@ -250,6 +250,6 @@ async def execute_query(
             f"Function name is: {execute_query.__name__}.\n"
         )
     else:
-        await logger.ainfo(f"The query '{sql_query}' was completed.\n")
+        await logger.ainfo(f"The query '{sql_query}' was executed.\n")
 
-        return res
+        return query_resp
